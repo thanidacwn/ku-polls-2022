@@ -1,4 +1,4 @@
-# ku-polls
+# Online Polls for Kasetsart University
 Web application for surveys at Kasetsart U.
 
 ## How to Install and Run
