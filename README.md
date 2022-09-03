@@ -1,10 +1,6 @@
 # Online Polls for Kasetsart University
 Web application for surveys at Kasetsart U.
 
-## How to Install and Run
-
-To be added.
-
 ## Project Documents
 
 All project documents are in the [Project Wik](https://github.com/ISP2022/ku-polls-example/wiki)
