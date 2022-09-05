@@ -1,18 +1,14 @@
+<html>
+
 {% if latest_question_list %}
     <ul>
     {% for question in latest_question_list %}
         <li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>
+        <li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
     {% endfor %}
     </ul>
 {% else %}
     <p>No polls are available.</p>
 {% endif %}
 
-<li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>
-<li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
-
-# the 'name' value as called by the {% url %} template tag
-path('<int:question_id>/', views.detail, name='detail'),
-
-# added the word 'specifics'
-path('specifics/<int:question_id>/', views.detail, name='detail'),
+</html>
