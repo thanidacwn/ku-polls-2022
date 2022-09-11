@@ -10,7 +10,18 @@ from django.urls import reverse
 from .models import Question
 
 
+def create_question(question_text, days):
+    """
+    Create a question with the given `question_text` and published the
+    given number of `days` offset to now (negative for questions published
+    in the past, positive for questions that have yet to be published).
+    """
+    time = timezone.now() + datetime.timedelta(days=days)
+    return Question.objects.create(question_text=question_text, pub_date=time)
+
+
 class QuestionModelTests(TestCase):
+
 
     def test_was_published_recently_with_future_question(self):
         """
@@ -39,17 +50,40 @@ class QuestionModelTests(TestCase):
         recent_question = Question(pub_date=time)
         self.assertIs(recent_question.was_published_recently(), True)
 
-def create_question(question_text, days):
-    """
-    Create a question with the given `question_text` and published the
-    given number of `days` offset to now (negative for questions published
-    in the past, positive for questions that have yet to be published).
-    """
-    time = timezone.now() + datetime.timedelta(days=days)
-    return Question.objects.create(question_text=question_text, pub_date=time)
+    def test_can_vote_now(self):
+        """ test users is allowed to vote, if publish date is a current time """
+        now = create_question(question_text="question1")
+        self.assertIs(now.can_vote(), True)
+
+    def test_can_vote_not_have_end_date(self):
+        """ test users is allowed to vote, if poll not have end date """
+        active_time = timezone.localtime() - datetime.timedelta(1)
+        active_poll = Question(question_text="question1", active_time=active_time)
+        self.assertIs(active_poll.can_vote(), True)
+
+    def test_can_vote_is_publish_have_end_date(self):
+        """ test users is allowed to vote, if poll is in voting period """
+        poll = create_question(question_text="question1", days=-7, end=7)
+        self.assertIs(poll.can_vote(), True)
+
+    def test_can_not_vote_after_end_date(self):
+        """ test users is not allowed to vote, after end date """
+        poll_end = create_question(question_text="question1", days=-7)
+        self.assertIs(poll_end.can_vote, False)
+
+    def test_can_not_vote_publish_date_in_future(self):
+        """ test users is not allowed to vote, before publish date"""
+        poll_future = create_question(question_text="question1", days=7)
+        self.assertIs(poll_future.can_vote(), False)
+
+    def test_can_not_vote_end_date_is_current(self):
+        """ test users is not allowed to vote, if current is end date"""
+        poll_passed = create_question(question_text="question", days=-7)
+        self.assertIs(poll_passed.can_vote(), False)
 
 
 class QuestionIndexViewTests(TestCase):
+
     def test_no_questions(self):
         """
         If no questions exist, an appropriate message is displayed.
