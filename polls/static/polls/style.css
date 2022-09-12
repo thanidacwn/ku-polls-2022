@@ -5,3 +5,7 @@ li a {
 body {
     background: #b1dcf8 url("images/background.png") no-repeat;
 }
+
+ul {
+    list-style: none;
+}
