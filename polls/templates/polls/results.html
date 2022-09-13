@@ -23,7 +23,7 @@
         {% if question.can_vote %}
         <a href="{% url 'polls:detail' question.id %}">Vote again?</a>
         {% endif %}
-        <a>href="{% url 'polls:index' %}">Home</a>
+        <a href="{% url 'polls:index' %}">Home</a>
     </div>
 </body>
 
