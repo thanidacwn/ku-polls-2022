@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Choice, Question
 
@@ -22,7 +23,7 @@ class IndexView(generic.ListView):
         ).order_by('-pub_date')[:5]
 
 
-class DetailView(generic.DetailView):
+class DetailView(generic.DetailView, LoginRequiredMixin):
     model = Question
     template_name = 'polls/detail.html'
 
@@ -47,6 +48,10 @@ class ResultsView(generic.DetailView):
 
 
 def vote(request, question_id):
+    """Vote for a choice on a question (poll)."""
+    user = request.user
+    if not user.is_authenticated:
+       return redirect('login')
     question = get_object_or_404(Question, pk=question_id)
     try:
         selected_choice = question.choice_set.get(pk=request.POST['choice'])
