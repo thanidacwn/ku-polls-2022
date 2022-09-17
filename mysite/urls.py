@@ -20,6 +20,7 @@ from django.http import HttpResponseRedirect
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('polls/', include('polls.urls')),
-    path("", lambda request: HttpResponseRedirect('polls/'))
+    path("", lambda request: HttpResponseRedirect('polls/')),
+    path('accounts/', include('django.contrib.auth.urls')),
 
 ]
