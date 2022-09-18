@@ -24,6 +24,7 @@ class IndexView(generic.ListView):
 
 
 class DetailView(generic.DetailView, LoginRequiredMixin):
+    """Class based view for viewing a poll."""
     model = Question
     template_name = 'polls/detail.html'
 
@@ -41,7 +42,6 @@ class DetailView(generic.DetailView, LoginRequiredMixin):
         return render(request, 'polls/detail.html', {'question': poll})
 
 
-
 class ResultsView(generic.DetailView):
     model = Question
     template_name = 'polls/results.html'
@@ -50,7 +50,6 @@ class ResultsView(generic.DetailView):
 @login_required(login_url='/accounts/login')
 def vote(request, question_id):
     """Vote for a choice on a question (poll)."""
-
     user = request.user
     if not user.is_authenticated:
        return redirect('login')
