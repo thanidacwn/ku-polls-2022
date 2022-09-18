@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpRequest
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Choice, Question
 from django.contrib.auth.decorators import login_required
+from .models import Choice, Question, Vote
 
 
 class IndexView(generic.ListView):
@@ -48,8 +49,9 @@ class ResultsView(generic.DetailView):
 
 
 @login_required(login_url='/accounts/login')
-def vote(request, question_id):
+def vote(request: HttpRequest, question_id):
     """Vote for a choice on a question (poll)."""
+
     user = request.user
     if not user.is_authenticated:
        return redirect('login')
@@ -65,15 +67,21 @@ def vote(request, question_id):
         })
     else:
         # to vote it and save the result
-        if question.can_vote():
-            selected_choice.votes += 1
-            selected_choice.save()
-            # after voting it will redirct to result page
-            return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+        try:
+            vote_ob = Vote.objects.get(user=user)
+            vote_ob.choice = selected_choice
+            vote_ob.save()
+        except Vote.DoesNotExist:
+            Vote.objects.create(user=user, choice=selected_choice, 
+            question=selected_choice.question).save()
+
+        # after voting it will redirct to result page
         else:
             # if question is expired it will redirect to the index page.
             messages.error(request, "User can't vote this question.")
             return HttpResponseRedirect(reverse('polls:index'))
+
+    return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
 
 
 class EyesOnlyView(LoginRequiredMixin, generic.ListView):

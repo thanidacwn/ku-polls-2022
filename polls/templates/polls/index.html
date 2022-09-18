@@ -17,21 +17,26 @@
             {% for question in latest_question_list %}
             <li>             
                 <a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a>
-                <a href="{% url 'polls:results' question.id %}"><button type="button">{{"Results"}}</button></a>
+                <a href="{% url 'polls:results' question.id %}">
+                    <button type="button">{{"Results"}}</button></a>
             </li>
             {% endfor %}
-            </ul>
-            {% else %}
-                <p>No polls are available now.</p>
-            {% endif %}
+        </ul>
+        {% else %}
+            <p>No polls are available now.</p>
+        {% endif %}
 
-            {% if user.is_authenticated %}
-            <label>{{"login as "}}</label>
-            <user>{{user.username}}</user> 
-            <a href="{% url 'logout' %}"><button type="button">Log Out</button></a>
-            {% else %}
-            <a href="{% url 'login' %}"><button type="button">Log in?</button></a>
-            {% endif %}
+        {% if user.is_authenticated %}
+        <label>{{"login as "}}</label>
+        <user>{{user.username}}</user> 
+        <a href="{% url 'logout' %}"><button type="button">Log Out</button></a>
+        
+        {% else %}
+        <a href="{% url 'login' %}"><button type="button">Log in?</button></a>
+
+        {% endif %}
+        {% endblock body%}
+        {% block button %}{% endblock button %}
     </body>
 
 </html>
