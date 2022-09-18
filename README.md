@@ -4,7 +4,8 @@ Web application for surveys at Kasetsart U.
 ## How to Running ku-polls
 | Username  | Password    |
 |-----------|-------------|
-| thanidacwn| tongtoy2546 |
+| computer1 | password1 |
+| computer2 | password2 |
 
 ## Project Documents
 All project documents are in the [Project Wik](https://github.com/ISP2022/ku-polls-example/wiki)
