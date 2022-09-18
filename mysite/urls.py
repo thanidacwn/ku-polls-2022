@@ -28,3 +28,4 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('', RedirectView.as_view(url='/polls/'))
 ]
+
