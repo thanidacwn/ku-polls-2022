@@ -25,6 +25,6 @@ urlpatterns = [
     path('polls/', include('polls.urls')),
     path("", lambda request: HttpResponseRedirect('polls/')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('signup/', views.signup, name='signup'),
+    path('signup/', signup, name='signup'),
     path('', RedirectView.as_view(url='/polls/'))
 ]
