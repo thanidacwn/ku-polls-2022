@@ -23,7 +23,6 @@ from .views import signup
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('polls/', include('polls.urls')),
-    path("", lambda request: HttpResponseRedirect('polls/')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('signup/', signup, name='signup'),
     path('', RedirectView.as_view(url='/polls/'))
