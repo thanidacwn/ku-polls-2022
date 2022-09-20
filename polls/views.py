@@ -1,4 +1,6 @@
-from django.http import HttpResponseRedirect, HttpRequest
+from django.http import HttpResponseRedirect, HttpRequest, Http404
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
@@ -35,12 +37,33 @@ class DetailView(generic.DetailView, LoginRequiredMixin):
         """
         return Question.objects.filter(pub_date__lte=timezone.now())
 
-    def detail(self, request, pk):
-        poll = get_object_or_404(Question, pk=pk)
-        if not poll.can_vote():
-            messages.info(request, 'Voting is not allowed now')
-            return redirect('polls:index')
-        return render(request, 'polls/detail.html', {'question': poll})
+    def get(self, request, *args, **kwargs):
+        error = None
+        user = request.user
+        try:
+            question = get_object_or_404(Question, pk=kwargs['pk'])
+        except Http404:
+            error = '404'
+        # if question is expired show a error and redirect to index
+        if error == '404' or not question.can_vote():
+            messages.error(
+                request, "This question is not available for voting.")
+            return HttpResponseRedirect(reverse('polls:index'))
+        try:
+            if not user.is_authenticated:
+                raise Vote.DoesNotExist
+            user_vote = question.vote_set.get(user=user).choice
+        except Vote.DoesNotExist:
+
+            # if user didnt select a choice or invalid cho[ice
+            # it will render as didnt select a choice
+            return super().get(request, *args, **kwargs)
+        else:
+            # go to polls detail application
+            return render(request, 'polls/detail.html', {
+                'question': question,
+                'user_vote': user_vote,
+            })
 
 
 class ResultsView(generic.DetailView):
@@ -87,3 +110,18 @@ def vote(request: HttpRequest, question_id):
 class EyesOnlyView(LoginRequiredMixin, generic.ListView):
     # this is the default. Same default as in auth_required decorator
     login_url = '/accounts/login/'
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_passwd = form.cleaned_data.get('password')
+            user = authenticate(username=username,password=raw_passwd)
+            login(request, user)
+            return redirect('polls')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', {'form': form})
