@@ -3,14 +3,14 @@
 </html>
 
 <head>
-    <title>KU Polls</title>
+    <title>Kasetsart University Polls</title>
     <link rel="stylesheet" href="{% static 'polls/style.css' %}">
 </head>
 
 <body>
     <div class="polls">
         <h1>
-            KU Polls
+            Kasetsart University Polls
         </h1>
         {% if latest_question_list %}
         <ul>
@@ -35,7 +35,6 @@
         <a href="{% url 'login' %}"><button type="button">Log in?</button></a>
 
         {% endif %}
-        {% endblock body%}
         {% block button %}{% endblock button %}
     </body>
 

@@ -37,79 +37,73 @@ class DetailView(generic.DetailView, LoginRequiredMixin):
         """
         return Question.objects.filter(pub_date__lte=timezone.now())
 
-    def get(self, request, *args, **kwargs):
-        error = None
+    def get(self, request, pk):
+        if request.user.is_anonymous:
+            return redirect(to='http://127.0.0.1:8000/accounts/login')
         user = request.user
         try:
-            question = get_object_or_404(Question, pk=kwargs['pk'])
-        except Http404:
-            error = '404'
-        # if question is expired show a error and redirect to index
-        if error == '404' or not question.can_vote():
-            messages.error(
-                request, "This question is not available for voting.")
+            question = Question.objects.get(pk=pk)
+        except (KeyError, Question.DoesNotExist):
+            messages.error(request, 'Access to question denied.')
             return HttpResponseRedirect(reverse('polls:index'))
-        try:
-            if not user.is_authenticated:
-                raise Vote.DoesNotExist
-            user_vote = question.vote_set.get(user=user).choice
-        except Vote.DoesNotExist:
-
-            # if user didnt select a choice or invalid cho[ice
-            # it will render as didnt select a choice
-            return super().get(request, *args, **kwargs)
-        else:
-            # go to polls detail application
-            return render(request, 'polls/detail.html', {
-                'question': question,
-                'user_vote': user_vote,
-            })
+        if question.can_vote():
+            try:
+                vote_info = Vote.objects.get(user=user, choice__in=question.choice_set.all())
+                check = vote_info.choice.choice_text
+            except Vote.DoesNotExist:
+                check = ''
+            return render(request, 'polls/detail.html', {'question': question,
+                                                         'check': check})
+        elif question.is_published():
+            messages.error(request, 'Voting period is closed for this question.')
+            return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+        messages.error(request, 'Access to question denied.')
+        return HttpResponseRedirect(reverse('polls:index'))
 
 
 class ResultsView(generic.DetailView):
     model = Question
     template_name = 'polls/results.html'
 
-
-@login_required(login_url='/accounts/login')
-def vote(request: HttpRequest, question_id):
-    """Vote for a choice on a question (poll)."""
-
-    user = request.user
-    if not user.is_authenticated:
-       return redirect('login')
-    question = get_object_or_404(Question, pk=question_id)
-
-    try:
-        selected_choice = question.choice_set.get(pk=request.POST['choice'])
-    except (KeyError, Choice.DoesNotExist):
-        # Redisplay the question voting form.
-        return render(request, 'polls/detail.html', {
-            'question': question,
-            'error_message': "You didn't select a choice.",
-        })
-    else:
-        # to vote it and save the result
+    def get(self, request, pk):
         try:
-            vote_ob = Vote.objects.get(user=user)
-            vote_ob.choice = selected_choice
-            vote_ob.save()
-        except Vote.DoesNotExist:
-            Vote.objects.create(user=user, choice=selected_choice, 
-            question=selected_choice.question).save()
-
-        # after voting it will redirct to result page
-        else:
-            # if question is expired it will redirect to the index page.
-            messages.error(request, "User can't vote this question.")
+            question = Question.objects.get(pk=pk)
+        except (KeyError, Question.DoesNotExist):
+            messages.error(request, 'Access to question denied.')
             return HttpResponseRedirect(reverse('polls:index'))
-
-    return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+        if question.is_published():
+            return render(request, 'polls/results.html', {'question': question})
+        messages.error(request, 'Access to question denied.')
+        return HttpResponseRedirect(reverse('polls:index'))
 
 
 class EyesOnlyView(LoginRequiredMixin, generic.ListView):
     # this is the default. Same default as in auth_required decorator
     login_url = '/accounts/login/'
+
+
+@login_required
+def vote(request, question_id):
+    """Add vote to choice to current question."""
+    question = get_object_or_404(Question, pk=question_id)
+    user = request.user
+    try:
+        selected_choice = question.choice_set.get(pk=request.POST['choice'])
+    except (KeyError, Choice.DoesNotExist):
+        # Redisplay question polls page
+        return render(request, 'polls/detail.html', {
+            'question': question,
+            'error_message': "You didn't select a choice.",
+        })
+    else:
+        # check if user has been voted
+        try:
+            vote_info = Vote.objects.get(user=user, choice__in=question.choice_set.all())
+            vote_info.choice = selected_choice
+            vote_info.save()
+        except Vote.DoesNotExist:
+            Vote.objects.create(choice=selected_choice, user=user).save()
+        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
 
 
 def signup(request):
