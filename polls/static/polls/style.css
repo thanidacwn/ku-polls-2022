@@ -3,9 +3,39 @@ li a {
 }
 
 body {
-    background: #b1dcf8 url("images/background.png") no-repeat;
+    background: #afdcf9 url("images/background.png") no-repeat;
+    font-family: Comic Sans MS;
+    text-align: left;
 }
 
 ul {
     list-style: none;
+}
+
+.questions {
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.questions caption {
+font-size: 25px
+}
+
+.questions th, .questions td {
+border: 2px solid black;
+padding: 8px;
+}
+
+.questions td:nth-child(3) {
+text-align: center;
+}
+
+.vote {
+width: 250px;
+text-align: left;
+padding: 20px;
+}
+
+.vote td:nth-child(2) {
+text-align: right;
 }
