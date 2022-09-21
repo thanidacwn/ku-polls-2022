@@ -1,3 +1,5 @@
+"""These are module contains the views of each page of the application."""
+
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -10,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 
 
 class IndexView(generic.ListView):
+    """ Index page of application """
     template_name = 'polls/index.html'
     context_object_name = 'latest_question_list'
 
@@ -24,7 +27,7 @@ class IndexView(generic.ListView):
 
 
 class DetailView(generic.DetailView, LoginRequiredMixin):
-    """Class based view for viewing a poll."""
+    """ Detail view showing the question detail."""
     model = Question
     template_name = 'polls/detail.html'
 
@@ -43,6 +46,7 @@ class DetailView(generic.DetailView, LoginRequiredMixin):
 
 
 class ResultsView(generic.DetailView):
+    """ Result view showing the vote result """
     model = Question
     template_name = 'polls/results.html'
 
