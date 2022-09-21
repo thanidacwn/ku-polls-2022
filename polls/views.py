@@ -1,3 +1,5 @@
+"""These are module contains the views of each page of the application."""
+
 from django.http import HttpResponseRedirect, HttpRequest, Http404
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm
@@ -13,12 +15,13 @@ from .models import Choice, Question, Vote
 
 
 class IndexView(generic.ListView):
+    """ Index page of application """
     template_name = 'polls/index.html'
     context_object_name = 'latest_question_list'
 
     def get_queryset(self):
         """
-        Return the last five published questions (not including those set to be
+        return the last five published questions (not including those set to be
         published in the future).
         """
         return Question.objects.filter(
@@ -27,17 +30,16 @@ class IndexView(generic.ListView):
 
 
 class DetailView(generic.DetailView, LoginRequiredMixin):
-    """Class based view for viewing a poll."""
+    """ Detail view showing the question detail."""
     model = Question
     template_name = 'polls/detail.html'
 
     def get_queryset(self):
-        """
-        Excludes any questions that aren't published yet.
-        """
+        """ Excludes any questions that aren't published yet """
         return Question.objects.filter(pub_date__lte=timezone.now())
 
     def get(self, request, pk):
+        """ return different pages in accordance to can_vote and is_published """
         if request.user.is_anonymous:
             return redirect(to='http://127.0.0.1:8000/accounts/login')
         user = request.user
@@ -62,10 +64,12 @@ class DetailView(generic.DetailView, LoginRequiredMixin):
 
 
 class ResultsView(generic.DetailView):
+    """ Result view showing the vote result """
     model = Question
     template_name = 'polls/results.html'
 
     def get(self, request, pk):
+        """ Process the voting """
         try:
             question = Question.objects.get(pk=pk)
         except (KeyError, Question.DoesNotExist):
@@ -96,7 +100,7 @@ def vote(request, question_id):
             'error_message': "You didn't select a choice.",
         })
     else:
-        # check if user has been voted
+        #check if user has been voted
         try:
             vote_info = Vote.objects.get(user=user, choice__in=question.choice_set.all())
             vote_info.choice = selected_choice
@@ -107,6 +111,7 @@ def vote(request, question_id):
 
 
 def signup(request):
+    """ create a new user."""
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():

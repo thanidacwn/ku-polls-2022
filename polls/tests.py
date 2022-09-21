@@ -1,13 +1,9 @@
-from django.test import TestCase
-
-# Create your tests here.
 import datetime
-
 from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
-
-from .models import Question
+from django.contrib.auth.models import User
+from .models import Question, Vote
 
 
 def create_question(question_text, days):
@@ -84,6 +80,13 @@ class QuestionModelTests(TestCase):
 
 class QuestionIndexViewTests(TestCase):
 
+    def setUp(self) -> None:
+        """Setup"""
+        self.user = User.objects.create(username='computer1')
+        self.user.set_password('password1')
+        self.user.save()
+        self.logged_in = self.client.login(username='computer1', password='password1')
+
     def test_no_questions(self):
         """
         If no questions exist, an appropriate message is displayed.
@@ -142,6 +145,15 @@ class QuestionIndexViewTests(TestCase):
 
 
 class QuestionDetailViewTests(TestCase):
+
+
+    def setUp(self) -> None:
+        """Setup"""
+        self.user = User.objects.create(username='computer1')
+        self.user.set_password('password1')
+        self.user.save()
+        self.logged_in = self.client.login(username='computer1', password='password1')
+
     def test_future_question(self):
         """
         The detail view of a question with a pub_date in the future
@@ -162,4 +174,23 @@ class QuestionDetailViewTests(TestCase):
         response = self.client.get(url)
         self.assertContains(response, past_question.question_text)
 
+    def test_user_can_vote_one(self):
+        """ user can vote once per question """
+        question = create_question("banana_question", days=-1)
+        choice_1 = question.choice_set.create(choice_text="banana1")
+        choice_2 = question.choice_set.create(choice_text="banana2")
+        result = self.client.post(reverse('polls:vote', 
+                                        args=(question.id,)), 
+                                        {'choice': choice_1.id})
+        self.assertEqual(Vote.objects.get(user=self.user, 
+                                        choice__in=question.choice_set.all()).choice, 
+                                        choice_1)
+        self.assertEqual(Vote.objects.all().count(), 1)
+        result = self.client.post(reverse('polls:vote', 
+                                        args=(question.id,)), 
+                                        {'choice': choice_2.id})
+        self.assertEqual(Vote.objects.get(user=self.user, 
+                                        choice__in=question.choice_set.all()).choice, 
+                                        choice_2)
+        self.assertEqual(Vote.objects.all().count(), 1)
 
