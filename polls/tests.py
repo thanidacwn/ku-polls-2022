@@ -1,12 +1,8 @@
-from django.test import TestCase
-
-# Create your tests here.
 import datetime
-
+from django.test import TestCase
 from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
-
 from .models import Question
 
 
@@ -50,6 +46,8 @@ def create_question(question_text, days):
 
 
 class QuestionIndexViewTests(TestCase):
+
+
     def test_no_questions(self):
         """
         If no questions exist, an appropriate message is displayed.
