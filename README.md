@@ -8,7 +8,7 @@ Web application for surveys at Kasetsart U.
 
 
 ## Project Documents
-All project documents are in the [Project Wik](https://github.com/ISP2022/ku-polls-example/wiki)
+All project documents are in the [Project Wik](https://github.com/thanidacwn/ku-polls/wiki)
 
 * [Vision Statement](https://github.com/thanidacwn/ku-polls/wiki/Vision-Statement)
 * [Requirements](https://github.com/thanidacwn/ku-polls/wiki/Requirements)
