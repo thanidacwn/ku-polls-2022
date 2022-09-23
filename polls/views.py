@@ -1,6 +1,5 @@
 """These are module contains the views of each page of the application."""
-
-from django.http import HttpResponseRedirect, HttpRequest, Http404
+from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import get_object_or_404, render, redirect
@@ -9,9 +8,8 @@ from django.views import generic
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Choice, Question
-from django.contrib.auth.decorators import login_required
 from .models import Choice, Question, Vote
+from django.contrib.auth.decorators import login_required
 
 
 class IndexView(generic.ListView):
@@ -39,26 +37,34 @@ class DetailView(generic.DetailView, LoginRequiredMixin):
         return Question.objects.filter(pub_date__lte=timezone.now())
 
     def get(self, request, pk):
-        """ return different pages in accordance to can_vote and is_published """
+        """ return different pages in accordance
+        to can_vote and is_published """
         if request.user.is_anonymous:
             return redirect(to='http://127.0.0.1:8000/accounts/login')
+
         user = request.user
         try:
             question = Question.objects.get(pk=pk)
         except (KeyError, Question.DoesNotExist):
             messages.error(request, 'Access to question denied.')
             return HttpResponseRedirect(reverse('polls:index'))
+
         if question.can_vote():
             try:
-                vote_info = Vote.objects.get(user=user, choice__in=question.choice_set.all())
+                vote_info = (
+                    Vote.objects.get(user=user,
+                                     choice__in=question.choice_set.all()))
                 check = vote_info.choice.choice_text
             except Vote.DoesNotExist:
                 check = ''
             return render(request, 'polls/detail.html', {'question': question,
                                                          'check': check})
         elif question.is_published():
-            messages.error(request, 'Voting period is closed for this question.')
-            return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+            messages.error(request,
+                           'Voting period is closed for this question.')
+            return HttpResponseRedirect(reverse('polls:results',
+                                                args=(question.id,)))
+
         messages.error(request, 'Access to question denied.')
         return HttpResponseRedirect(reverse('polls:index'))
 
@@ -76,7 +82,8 @@ class ResultsView(generic.DetailView):
             messages.error(request, 'Access to question denied.')
             return HttpResponseRedirect(reverse('polls:index'))
         if question.is_published():
-            return render(request, 'polls/results.html', {'question': question})
+            return render(request, 'polls/results.html',
+                          {'question': question})
         messages.error(request, 'Access to question denied.')
         return HttpResponseRedirect(reverse('polls:index'))
 
@@ -100,14 +107,16 @@ def vote(request, question_id):
             'error_message': "You didn't select a choice.",
         })
     else:
-        #check if user has been voted
+        # check if user has been voted
         try:
-            vote_info = Vote.objects.get(user=user, choice__in=question.choice_set.all())
+            vote_info = Vote.objects.get(user=user,
+                                         choice__in=question.choice_set.all())
             vote_info.choice = selected_choice
             vote_info.save()
         except Vote.DoesNotExist:
             Vote.objects.create(choice=selected_choice, user=user).save()
-        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+        return HttpResponseRedirect(reverse('polls:results',
+                                            args=(question.id,)))
 
 
 def signup(request):
@@ -118,7 +127,7 @@ def signup(request):
             form.save()
             username = form.cleaned_data.get('username')
             raw_passwd = form.cleaned_data.get('password')
-            user = authenticate(username=username,password=raw_passwd)
+            user = authenticate(username=username, password=raw_passwd)
             login(request, user)
             return redirect('polls')
     else:
