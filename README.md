@@ -1,4 +1,5 @@
 ![Unittest](https://github.com/thanidacwn/ku-polls/actions/workflows/test.yml/badge.svg)
+[![codecov](https://codecov.io/gh/thanidacwn/ku-polls/branch/master/graph/badge.svg?token=WPOQJASK55)](https://codecov.io/gh/thanidacwn/ku-polls)
 
 # Online Polls for Kasetsart University
 Web application for surveys at Kasetsart U.
