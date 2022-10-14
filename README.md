@@ -1,5 +1,3 @@
-[![Unittest](https://github.com/thanidacwn/ku-polls/actions/workflows/test.yml/badge.svg)](https://github.com/thanidacwn/ku-polls/actions/workflows/test.yml)
-
 # Online Polls for Kasetsart University
 Web application for surveys at Kasetsart U.
 
